@@ -14,17 +14,26 @@ export default function loginScreen({navigation}) {
         navigation.navigate('Home')
     }
 
+    const onSignOutPress = () => {
+        Auth.signOut({global: true })
+        navigation.navigate('Login')
+    }
+
     return (
         <View style={styles.container}>
-            <KeyboardAwareScrollView
-                style={{ flex: 1, width: '100%' }}
-                keyboardShouldPersistTaps="always">
+            {/* <KeyboardAwareScrollView */}
+                {/* keyboardShouldPersistTaps="always"> */}
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => onSignInPress()}>
                     <Text style={styles.buttonTitle}>Log in with Google</Text>
                 </TouchableOpacity>
-            </KeyboardAwareScrollView>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => onSignOutPress()}>
+                    <Text style={styles.buttonTitle}>Sign Out</Text>
+                </TouchableOpacity>
+            {/* </KeyboardAwareScrollView> */}
         </View>
     )
 }

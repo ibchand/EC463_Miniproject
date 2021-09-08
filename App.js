@@ -15,8 +15,6 @@ import { Auth } from "aws-amplify";
 if (!global.btoa) {  global.btoa = encode }
 if (!global.atob) { global.atob = decode }
 
-console.log("IN APP.JS")
-
 Auth.configure(config);
 
 const Stack = createStackNavigator();
