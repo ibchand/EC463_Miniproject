@@ -10,12 +10,12 @@ import {decode, encode} from 'base-64'
 
 // import Amplify from "aws-amplify";
 import config from "./src/aws-exports";
-import { Auth } from "aws-amplify";
+import { Amplify, Auth } from "aws-amplify";
 
 if (!global.btoa) {  global.btoa = encode }
 if (!global.atob) { global.atob = decode }
 
-Auth.configure(config);
+Amplify.configure(config);
 
 const Stack = createStackNavigator();
 

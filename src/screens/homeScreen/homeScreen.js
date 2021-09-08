@@ -135,7 +135,7 @@ export default function homeScreen({props, navigation}) {
 
     async function updateUserData() {
         try {
-            const userData = await API.graphql(graphqlOperation(updateFood_table, { input: {username: global.username, daily_foods: global.daily_foods, recipes: global.recipes}}));
+            const userData = await API.graphql(graphqlOperation(mutations.updateFood_table, { input: {username: global.username, daily_foods: global.daily_foods, recipes: global.recipes}}));
             console.log("Updated User data entry")
         } catch (error) {
             console.log(error);
