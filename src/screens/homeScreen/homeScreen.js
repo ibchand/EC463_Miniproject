@@ -6,16 +6,28 @@ import { Auth, API, graphqlOperation } from "aws-amplify";
 
 import { BarCodeScanner } from 'expo-barcode-scanner';
 
+import * as backend_calls from '../../api/backend_calls';
+
+import * as mutations from "../../graphql/mutations";
+
 global.username = "Empty";
 global.upc = "";
 global.calories = "";
+// global.daily;
+// global.recipes;
 
 export default function homeScreen({props, navigation}) {
+
+    Auth.currentAuthenticatedUser({
+        bypassCache: false
+    }).then(user => global.username = user.username)
+    .catch(err => console.log(err))
 
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
     const [servings, onChangeServings] = React.useState("Servings");
     const [totalCals, onChangeCals] = React.useState("Calories");
+    // const [username, setUsername] = React.useState("Empty");
 
     useEffect(() => {
         (async () => {
@@ -28,6 +40,7 @@ export default function homeScreen({props, navigation}) {
         setScanned(true);
         // global.upc = data;
         alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+        global.upc = data;
         getFood(data);
     };
     
@@ -76,10 +89,58 @@ export default function homeScreen({props, navigation}) {
         onChangeCals(total);
     }
 
-    Auth.currentAuthenticatedUser({
-        bypassCache: false
-    }).then(user => global.username = user.username)
-    .catch(err => console.log(err))
+    async function createUserData() {
+        try {
+            daily_foods = [
+                {
+                    "UPC": global.upc,
+                    "Calories": global.calories,
+                    "Servings": servings,
+                    "Total": totalCals
+                }            
+            ];
+            recipes = [
+                {
+                    "UPC": global.upc,
+                    "Calories": global.calories,
+                    "Servings": servings,
+                    "Total": totalCals
+                }            
+            ];
+            const userData = await API.graphql(graphqlOperation(mutations.createFood_table, { input: {username: global.username, daily_foods: daily_foods, recipes: recipes}}));
+            console.log("Created User data entry")
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // const updateDaily() {
+    //     global.daily = [
+    //         {
+    //             "UPC": global.upc,
+    //             "Calories": global.calories,
+    //             "Servings": servings,
+    //             "Total": totalCals
+    //         }            
+    //     ];
+    //     global.recipes = [
+    //         {
+    //             "UPC": global.upc,
+    //             "Calories": global.calories,
+    //             "Servings": servings,
+    //             "Total": totalCals
+    //         }            
+    //     ];
+    // }
+
+    async function updateUserData() {
+        try {
+            const userData = await API.graphql(graphqlOperation(updateFood_table, { input: {username: global.username, daily_foods: global.daily_foods, recipes: global.recipes}}));
+            console.log("Updated User data entry")
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <View style={{ flex:1 }}>
@@ -94,6 +155,13 @@ export default function homeScreen({props, navigation}) {
                 {scanned && <TextInput style={styles.input} placeholder="Enter # of Servings" onChangeText={servings => calcCals(servings)} value={servings} />}
                 {scanned && <Text>Total Calories: {totalCals}</Text>}
                 {scanned && <Text>Total Servings: {servings}</Text>}
+            </View>
+            <View style={{ flex:1, background: "skyblue" }}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => updateUserData()}>
+                    <Text style={styles.buttonTitle}>Test Data Create</Text>
+                </TouchableOpacity>
             </View>
             <View style={{ flex:1, background: "skyblue" }}>
                 <TouchableOpacity

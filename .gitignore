@@ -12,6 +12,13 @@ web-build/
 # macOS
 .DS_Store
 
+
+src/graphql
+.graphqlconfig.yml
+
+.*
+!/.gitignore
+
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
 amplify/.config/local-*
@@ -32,10 +39,3 @@ amplify-gradle-config.json
 amplifytools.xcconfig
 .secret-*
 #amplify-do-not-edit-end
-
-src/graphql
-.graphqlconfig.yml
-amplify/
-
-.*
-!/.gitignore
