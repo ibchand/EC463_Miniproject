@@ -229,7 +229,7 @@ export default function homeScreen({props, navigation}) {
                 {scanned && <Text>Total Calories: {totalCals}</Text>}
                 {scanned && <Text>Total Servings: {servings}</Text>}
             </View>
-            <View style={{ flex:2, background: "skyblue" }}>
+            <View style={{ flex:2, background: "#000000" }}>
                 {recipeBOOL && <TextInput style={styles.input} placeholder="Enter Recipe Name" onChangeText={(input)=>onRecipeName(input)} value="My Recipe" />}
                 {recipeBOOL && <TouchableOpacity
                     style={styles.button}
@@ -242,14 +242,14 @@ export default function homeScreen({props, navigation}) {
                     <Text style={styles.buttonTitle}>{recipeText}</Text>
                 </TouchableOpacity>
             </View>
-            <View style={{ flex:1, background: "skyblue" }}>
+            <View style={{ flex:1, background: "#000000" }}>
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => addDailyFood()}>
                     <Text style={styles.buttonTitle}>Add to Daily Foods</Text>
                 </TouchableOpacity>
             </View>
-            <View style={{ flex:1, background: "skyblue" }}>
+            <View style={{ flex:1, background: "#000000" }}>
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => onSignOutPress()}>

@@ -24,8 +24,11 @@ function App() {
   const [user, setUser] = useState(null)
 
   return (
+
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{ headerStyle: { backgroundColor: 'royalblue' },headerTintColor: 'darkblue' }}
+        >
         { user ? (
           <Stack.Screen name="Home" component={homeScreen}>
             {props => <loginScreen {...props} extraData={user} />}
