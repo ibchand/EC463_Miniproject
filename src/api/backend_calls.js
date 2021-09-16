@@ -5,7 +5,7 @@ import { API, graphqlOperation } from "aws-amplify";
 // MUTATIONS
 export const createUserData = async values => {
     try {  
-        const data = await API.graphql(graphqlOperation(createFood_table, { input: { username: values.username, daily_foods: values.daily_foods, recipes: values.recipess }}));
+        const data = await API.graphql(graphqlOperation(createFood_table, { input: { username: values.username, daily_foods: values.daily_foods, recipes: values.recipes }}));
     } catch (error) {
         console.log("Error creating user data", error);
     }

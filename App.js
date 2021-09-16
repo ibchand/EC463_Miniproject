@@ -4,6 +4,7 @@ import { Button, SafeAreaView, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { loginScreen, homeScreen } from './src/screens'
+// import { loginScreen, homeScreen, recipeScreen, foodScreen } from './src/screens'
 import {decode, encode} from 'base-64'
 
 // import { withAuthenticator } from 'aws-amplify-react-native'
@@ -34,6 +35,7 @@ function App() {
           <>
             <Stack.Screen name="Login" component={loginScreen} />
             <Stack.Screen name="Home" component={homeScreen} options={{ headerLeft: null, gestureEnabled: false }} />
+
           </>
         )}
       </Stack.Navigator>
@@ -61,3 +63,6 @@ export default App
 // }
 
 // export default function App()
+
+            // {/* <Stack.Screen name="Recipe" component={recipeScreen} /> */}
+            // {/* <Stack.Screen name="Food" component={foodScreen} /> */}

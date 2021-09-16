@@ -2,6 +2,11 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
+    food: {
+         flex: 1,
+        alignItems: 'center',
+        backgroundColor: '#7291a3'
+    },
     container: {
         flex: 1,
         alignItems: 'center'

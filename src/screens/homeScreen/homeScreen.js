@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { TextInput, StyleSheet, Button, TouchableOpacity, Text, View } from 'react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import styles from './styles';
 
 import { Auth, API, graphqlOperation } from "aws-amplify";
@@ -23,6 +24,8 @@ global.currentFood = {};
 global.userDailyFoods = [];
 global.userRecipes = [];
 global.localRecipe = [];
+global.listFoodBOOL = false;
+global.listRecipeBOOL = false;
 
 
 export default function homeScreen({props, navigation}) {
@@ -115,7 +118,12 @@ export default function homeScreen({props, navigation}) {
                 // Pull Existing Daily Foods
                 const userData = await backend_calls.getUserData(username);
                 global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+                try {
                 global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
+                } catch (error) {
+                    console.log("No Recipes")
+                    global.userRecipes = null;
+                }
 
                 // Append new daily foods
                 global.userDailyFoods.push(global.currentFood)
@@ -132,7 +140,7 @@ export default function homeScreen({props, navigation}) {
             } catch (error) {                
                 // // If none exist, initialize
                 global.userDailyFoods = [global.currentFood];
-                global.userRecipes = [];
+                global.userRecipes = null;
 
                 // // Push new daily foods
                 values = {
@@ -157,16 +165,26 @@ export default function homeScreen({props, navigation}) {
                 try {
                      // Pull Existing Recipes
                     const userData = await backend_calls.getUserData(username);
-                    global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
-                    global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+                    try {
+                        global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+                    } catch (error) {
+                        console.log("No Daily Foods")
+                        global.userDailyFoods = null;
+                    }
+                    global.userRecipes = [JSON.parse(userData["data"]["getFood_table"]["recipes"])];
+                    // console.log("USERRECIPES");
+                    // console.log(global.userRecipes);
 
                     // Append new recipe
+                    global.localRecipe = { recipeName: recipeName, recipe: global.localRecipe };
+                    // console.log("GLOBAL LOCAL RECIPE");
+                    // console.log(global.localRecipe);
                     global.userRecipes.push(global.localRecipe);
-                    console.log("Appended localRecipe -");
-                    console.log(global.localRecipe);
+                    // console.log("Appended localRecipe -");
+                    // console.log(global.localRecipe);
 
                     // Publish Recipes
-                    values = {
+                    var values = {
                         username: username,
                         daily_foods: JSON.stringify(global.userDailyFoods),
                         recipes: JSON.stringify(global.userRecipes)
@@ -178,16 +196,18 @@ export default function homeScreen({props, navigation}) {
                     global.localRecipe = [];
                 } catch (error) {
                     // // If none exist, initialize
-                    global.userDailyFoods = [];
-                    global.userRecipes = [global.localRecipe];
+                    // console.log('No entry exisits')
+                    // console.log(error)
+                    global.userDailyFoods = null;
+                    global.userRecipes = [{ recipeName: recipeName, recipe: [global.localRecipe] }];
 
                     // Publish Recipes
-                    values = {
+                    var values = {
                         username: username,
                         daily_foods: JSON.stringify(global.userDailyFoods),
                         recipes: JSON.stringify(global.userRecipes)
                     };
-                    console.log(values);
+                    // console.log(values);
                     backend_calls.createUserData(values);
                     console.log("RECIPE: CREATED USER DATA");
 
@@ -202,60 +222,98 @@ export default function homeScreen({props, navigation}) {
     }
 
     async function addFood2Recipe() {
+        const userData = await backend_calls.getUserData(username);
         try {
-            if (global.recipeBOOL) {
-                console.log(global.currentFood)
-                global.localRecipe.push(global.currentFood);
-                console.log("calCals: Added currentFood to localRecipe");
-                console.log(global.localRecipe);
-            }
+            global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
         } catch (error) {
-            console.log(error);
+            console.log("No Daily Foods")
+            global.userDailyFoods = null;
         }
+    }
+
+    async function listRecipes() {
+        const userData = await backend_calls.getUserData(username);
+        try {
+            global.userRecipes = [JSON.parse(userData["data"]["getFood_table"]["recipes"])];
+        } catch (error) {
+            console.log("No Recipes")
+            global.userRecipes = null;
+        }
+
+        for (var i = 0; i < global.userRecipes[0][0].length; i++) {
+            if (global.userRecipes[0][0][i] != null) {
+                console.log(global.userRecipes[0][0][i]);
+            }
+        }        
+    }
+
+    async function listFoods() {
     }
 
 
     return (
-        <View style={{ flex:1 }}>
-            <View style={{ flex:2 }}>
+
+        <View style = {styles.container}>
+            <View style={styles.container2}>
                 <BarCodeScanner
                     onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-                    style={{ flex: 1 }}
+                    style={StyleSheet.absoluteFillObject}
                 />
             </View>
-            <View style={{ flex:1 }}>
-                {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
-                {scanned && <TextInput style={styles.input} placeholder="Enter # of Servings" onChangeText={(input)=>calcCals(input)} />}
-                {scanned && <Text>Total Calories: {totalCals}</Text>}
-                {scanned && <Text>Total Servings: {servings}</Text>}
-            </View>
-            <View style={{ flex:2, background: "skyblue" }}>
-                {recipeBOOL && <TextInput style={styles.input} placeholder="Enter Recipe Name" onChangeText={(input)=>onRecipeName(input)} value="My Recipe" />}
-                {recipeBOOL && <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => addFood2Recipe()}>
-                    <Text style={styles.buttonTitle}>Add to Recipe</Text>
-                </TouchableOpacity>}
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => createRecipe()}>
-                    <Text style={styles.buttonTitle}>{recipeText}</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={{ flex:1, background: "skyblue" }}>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => addDailyFood()}>
-                    <Text style={styles.buttonTitle}>Add to Daily Foods</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={{ flex:1, background: "skyblue" }}>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => onSignOutPress()}>
-                    <Text style={styles.buttonTitle}>Sign Out</Text>
-                </TouchableOpacity>
-            </View>
+            {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
+            <KeyboardAwareScrollView
+                    style={{ flex: 1, width: '100%' }}
+                    keyboardShouldPersistTaps="always">
+                <View style={{ flex:1 }}>
+                    <View style={{ flex:1 }}>
+                        
+                        {scanned && <TextInput style={styles.input} placeholder="Enter # of Servings" onChangeText={(input)=>calcCals(input)} />}
+                        {scanned && <Text>Total Calories: {totalCals}</Text>}
+                        {scanned && <Text>Total Servings: {servings}</Text>}
+                    </View>
+                    <View style={{ flex:2, background: "skyblue" }}>
+                        {recipeBOOL && <TextInput style={styles.input} placeholder="Enter Recipe Name" onChangeText={(input)=>onRecipeName(input)} />}
+                        {recipeBOOL && <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => addFood2Recipe()}>
+                            <Text style={styles.buttonTitle}>Add to Recipe</Text>
+                        </TouchableOpacity>}
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => createRecipe()}>
+                            <Text style={styles.buttonTitle}>{recipeText}</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ flex:1, background: "skyblue" }}>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => addDailyFood()}>
+                            <Text style={styles.buttonTitle}>Add to Daily Foods</Text>
+                        </TouchableOpacity>
+                    </View>
+                     <View style={{ flex:1, background: "skyblue" }}>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => listRecipes()}>
+                            <Text style={styles.buttonTitle}>View Recipes</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ flex:1, background: "skyblue" }}>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => listFoods()}>
+                            <Text style={styles.buttonTitle}>View Daily Foods</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ flex:1, background: "skyblue" }}>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => onSignOutPress()}>
+                            <Text style={styles.buttonTitle}>Sign Out</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </KeyboardAwareScrollView>
         </View>
     )
 }
