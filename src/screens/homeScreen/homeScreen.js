@@ -266,12 +266,11 @@ export default function homeScreen({props, navigation}) {
                     keyboardShouldPersistTaps="always">
                 <View style={{ flex:1 }}>
                     <View style={{ flex:1 }}>
-                        
                         {scanned && <TextInput style={styles.input} placeholder="Enter # of Servings" onChangeText={(input)=>calcCals(input)} />}
                         {scanned && <Text>Total Calories: {totalCals}</Text>}
                         {scanned && <Text>Total Servings: {servings}</Text>}
                     </View>
-                    <View style={{ flex:2, background: "skyblue" }}>
+                    <View style={{ flex:2, background: "#000000" }}>
                         {recipeBOOL && <TextInput style={styles.input} placeholder="Enter Recipe Name" onChangeText={(input)=>onRecipeName(input)} />}
                         {recipeBOOL && <TouchableOpacity
                             style={styles.button}
@@ -284,28 +283,28 @@ export default function homeScreen({props, navigation}) {
                             <Text style={styles.buttonTitle}>{recipeText}</Text>
                         </TouchableOpacity>
                     </View>
-                    <View style={{ flex:1, background: "skyblue" }}>
+                    <View style={{ flex:1, background: "#000000" }}>
                         <TouchableOpacity
                             style={styles.button}
                             onPress={() => addDailyFood()}>
                             <Text style={styles.buttonTitle}>Add to Daily Foods</Text>
                         </TouchableOpacity>
                     </View>
-                     <View style={{ flex:1, background: "skyblue" }}>
+                     <View style={{ flex:1, background: "#000000" }}>
                         <TouchableOpacity
                             style={styles.button}
                             onPress={() => listRecipes()}>
                             <Text style={styles.buttonTitle}>View Recipes</Text>
                         </TouchableOpacity>
                     </View>
-                    <View style={{ flex:1, background: "skyblue" }}>
+                    <View style={{ flex:1, background: "#000000" }}>
                         <TouchableOpacity
                             style={styles.button}
                             onPress={() => listFoods()}>
                             <Text style={styles.buttonTitle}>View Daily Foods</Text>
                         </TouchableOpacity>
                     </View>
-                    <View style={{ flex:1, background: "skyblue" }}>
+                    <View style={{ flex:1, background: "#000000" }}>
                         <TouchableOpacity
                             style={styles.button}
                             onPress={() => onSignOutPress()}>

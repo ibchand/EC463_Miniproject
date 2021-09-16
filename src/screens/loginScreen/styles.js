@@ -3,14 +3,15 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center'
+        alignItems: 'center',
+        backgroundColor: 'black'
     },
     title: {
 
     },
     logo: {
         flex: 1,
-        height: 120,
+        height: 30,
         width: 90,
         alignSelf: "center",
         margin: 30
@@ -27,12 +28,12 @@ export default StyleSheet.create({
         paddingLeft: 16
     },
     button: {
-        backgroundColor: '#788eec',
+        backgroundColor: 'gray',
         marginLeft: 30,
         marginRight: 30,
         marginTop: 20,
         height: 48,
-        borderRadius: 5,
+        borderRadius: 50,
         alignItems: "center",
         justifyContent: 'center'
     },
