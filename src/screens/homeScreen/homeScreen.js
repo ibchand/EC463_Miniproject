@@ -113,108 +113,235 @@ export default function homeScreen({props, navigation}) {
 
     async function addDailyFood() {
         try {
-            // Pull Existing Daily Foods
             try {
-                // Pull Existing Daily Foods
-                const userData = await backend_calls.getUserData(username);
-                global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
-                try {
-                global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
-                } catch (error) {
-                    console.log("No Recipes")
-                    global.userRecipes = null;
-                }
+                var userData = await backend_calls.getUserData(username);
+            } catch (error) {
+                console.log("Failed to pull any user data");
+                global.userDailyFoods = [];
+                global.userRecipes = [];
 
-                // Append new daily foods
-                global.userDailyFoods.push(global.currentFood)
-
-                // Push new daily foods
-                values = {
-                    username: username,
-                    daily_foods: JSON.stringify(global.userDailyFoods),
-                    recipes: JSON.stringify(global.userRecipes)
-                };
-                // console.log(values);
-                backend_calls.updateUserData(values);
-                console.log("DAILY: UPDATED USER DATA");
-            } catch (error) {                
-                // // If none exist, initialize
-                global.userDailyFoods = [global.currentFood];
-                global.userRecipes = null;
-
-                // // Push new daily foods
-                values = {
-                    username: username,
-                    daily_foods: JSON.stringify(global.userDailyFoods),
-                    recipes: JSON.stringify(global.userRecipes)
-                };
                 backend_calls.createUserData(values);
                 console.log("DAILY: CREATED USER DATA");
             }
+
+            try {
+                global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+            } catch (error) {
+                console.log("User has no daily foods");
+                global.userDailyFoods = [];
+            }
+
+            try {
+                global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
+            } catch (error) {
+                console.log("User has no recipes");
+                global.userRecipes = [];
+            }
+
+            // Append new daily foods
+            global.userDailyFoods.push(global.currentFood)
+
+            // Prep object to store
+            values = {
+                username: username,
+                daily_foods: JSON.stringify(global.userDailyFoods),
+                recipes: JSON.stringify(global.userRecipes)
+            };
+
+            // Update user data
+            backend_calls.updateUserData(values);
+            console.log("DAILY: UPDATED USER DATA");
+
         } catch (error) {
             console.log(error);
         }
+    
+        // try {
+        //     // Pull Existing Daily Foods
+        //     try {
+        //         // Pull Existing Daily Foods
+        //         const userData = await backend_calls.getUserData(username);
+        //         global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+        //         try {
+        //         global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
+        //         } catch (error) {
+        //             console.log("No Recipes")
+        //             global.userRecipes = null;
+        //         }
+
+        //         // Append new daily foods
+        //         global.userDailyFoods.push(global.currentFood)
+
+        //         // Push new daily foods
+        //         values = {
+        //             username: username,
+        //             daily_foods: JSON.stringify(global.userDailyFoods),
+        //             recipes: JSON.stringify(global.userRecipes)
+        //         };
+        //         // console.log(values);
+        //         backend_calls.updateUserData(values);
+        //         console.log("DAILY: UPDATED USER DATA");
+        //     } catch (error) {                
+        //         // // If none exist, initialize
+        //         global.userDailyFoods = [global.currentFood];
+        //         global.userRecipes = null;
+
+        //         // // Push new daily foods
+        //         values = {
+        //             username: username,
+        //             daily_foods: JSON.stringify(global.userDailyFoods),
+        //             recipes: JSON.stringify(global.userRecipes)
+        //         };
+        //         backend_calls.createUserData(values);
+        //         console.log("DAILY: CREATED USER DATA");
+        //     }
+        // } catch (error) {
+        //     console.log(error);
+        // }
     }
 
     async function createRecipe() {
+        
+        // try {
+        //     try {
+        //         const userData = await backend_calls.getUserData(username);
+        //     } catch (error) {
+        //         console.log("Failed to pull any user data");
+        //         global.userDailyFoods = [];
+        //         global.userRecipes = [];
+
+        //         backend_calls.createUserData(values);
+        //         console.log("DAILY: CREATED USER DATA");
+        //     }
+
+        //     try {
+        //         global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+        //     } catch (error) {
+        //         console.log("User has no daily foods");
+        //         global.userDailyFoods = [];
+        //     }
+
+        //     try {
+        //         global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
+        //     } catch (error) {
+        //         console.log("User has no recipes");
+        //         global.userRecipes = [];
+        //     }
+
+        //     // Append new recipe
+        //     global.localRecipe = { recipeName: recipeName, recipe: global.localRecipe };
+        //     global.userRecipes.push(global.localRecipe);
+
+        //     // Prep object to store
+        //     values = {
+        //         username: username,
+        //         daily_foods: JSON.stringify(global.userDailyFoods),
+        //         recipes: JSON.stringify(global.userRecipes)
+        //     };
+
+        //     // Update user data
+        //     backend_calls.updateUserData(values);
+        //     console.log("DAILY: UPDATED USER DATA");
+
+        // } catch (error) {
+        //     console.log(error);
+        // }
+
+
+
         try {
             global.recipeBOOL = !global.recipeBOOL;
             global.recipeBOOL ? onRecipe("Finish Recipe") : onRecipe("Create Recipe");
 
             if (!global.recipeBOOL) {
                 try {
-                     // Pull Existing Recipes
-                    const userData = await backend_calls.getUserData(username);
-                    try {
-                        global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
-                    } catch (error) {
-                        console.log("No Daily Foods")
-                        global.userDailyFoods = null;
-                    }
-                    global.userRecipes = [JSON.parse(userData["data"]["getFood_table"]["recipes"])];
-                    // console.log("USERRECIPES");
-                    // console.log(global.userRecipes);
-
-                    // Append new recipe
-                    global.localRecipe = { recipeName: recipeName, recipe: global.localRecipe };
-                    // console.log("GLOBAL LOCAL RECIPE");
-                    // console.log(global.localRecipe);
-                    global.userRecipes.push(global.localRecipe);
-                    // console.log("Appended localRecipe -");
-                    // console.log(global.localRecipe);
-
-                    // Publish Recipes
-                    var values = {
-                        username: username,
-                        daily_foods: JSON.stringify(global.userDailyFoods),
-                        recipes: JSON.stringify(global.userRecipes)
-                    };
-                    backend_calls.updateUserData(values);
-                    console.log("RECIPE: UPDATED USER DATA");
-
-                    // Reset Local Recipe
-                    global.localRecipe = [];
+                    var userData = await backend_calls.getUserData(username);
                 } catch (error) {
-                    // // If none exist, initialize
-                    // console.log('No entry exisits')
-                    // console.log(error)
-                    global.userDailyFoods = null;
-                    global.userRecipes = [{ recipeName: recipeName, recipe: [global.localRecipe] }];
-
-                    // Publish Recipes
-                    var values = {
-                        username: username,
-                        daily_foods: JSON.stringify(global.userDailyFoods),
-                        recipes: JSON.stringify(global.userRecipes)
-                    };
-                    // console.log(values);
+                    console.log("Failed to pull any user data");
+                    global.userDailyFoods = [];
+                    global.userRecipes = [];
+    
                     backend_calls.createUserData(values);
-                    console.log("RECIPE: CREATED USER DATA");
-
-                    // Reset Local Recipe
-                    global.localRecipe = [];
-                    console.log("Reset local recipe");
+                    console.log("DAILY: CREATED USER DATA");
                 }
+    
+                try {
+                    global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+                } catch (error) {
+                    console.log("User has no daily foods");
+                    global.userDailyFoods = [];
+                }
+    
+                try {
+                    global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
+                } catch (error) {
+                    console.log("User has no recipes");
+                    global.userRecipes = [];
+                }
+    
+                // Append new recipe
+                global.localRecipe = { recipeName: recipeName, recipe: global.localRecipe };
+                global.userRecipes.push(global.localRecipe);
+    
+                // Prep object to store
+                values = {
+                    username: username,
+                    daily_foods: JSON.stringify(global.userDailyFoods),
+                    recipes: JSON.stringify(global.userRecipes)
+                };
+    
+                // Update user data
+                backend_calls.updateUserData(values);
+                console.log("DAILY: UPDATED USER DATA");
+                // try {
+                //      // Pull Existing Recipes
+                //     const userData = await backend_calls.getUserData(username);
+                //     global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+                //     global.userRecipes = [JSON.parse(userData["data"]["getFood_table"]["recipes"])];
+                //     // console.log("USERRECIPES");
+                //     // console.log(global.userRecipes);
+
+                //     // Append new recipe
+                //     global.localRecipe = { recipeName: recipeName, recipe: global.localRecipe };
+                //     // console.log("GLOBAL LOCAL RECIPE");
+                //     // console.log(global.localRecipe);
+                //     global.userRecipes.push(global.localRecipe);
+                //     // console.log("Appended localRecipe -");
+                //     // console.log(global.localRecipe);
+
+                //     // Publish Recipes
+                //     var values = {
+                //         username: username,
+                //         daily_foods: JSON.stringify(global.userDailyFoods),
+                //         recipes: JSON.stringify(global.userRecipes)
+                //     };
+                //     console.log(values);
+                //     backend_calls.updateUserData(values);
+                //     console.log("RECIPE: UPDATED USER DATA");
+
+                //     // Reset Local Recipe
+                //     global.localRecipe = [];
+                // } catch (error) {
+                //     // // If none exist, initialize
+                //     // console.log('No entry exisits')
+                //     // console.log(error)
+                //     global.userDailyFoods = null;
+                //     global.userRecipes = [{ recipeName: recipeName, recipe: [global.localRecipe] }];
+
+                //     // Publish Recipes
+                //     var values = {
+                //         username: username,
+                //         daily_foods: JSON.stringify(global.userDailyFoods),
+                //         recipes: JSON.stringify(global.userRecipes)
+                //     };
+                //     // console.log(values);
+                //     backend_calls.createUserData(values);
+                //     console.log("RECIPE: CREATED USER DATA");
+
+                //     // Reset Local Recipe
+                //     global.localRecipe = [];
+                //     console.log("Reset local recipe");
+                // }
             }
         } catch (error) {
             console.log(error);
@@ -222,12 +349,15 @@ export default function homeScreen({props, navigation}) {
     }
 
     async function addFood2Recipe() {
-        const userData = await backend_calls.getUserData(username);
         try {
-            global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+            if (global.recipeBOOL) {
+                console.log(global.currentFood)
+                global.localRecipe.push(global.currentFood);
+                console.log("calCals: Added currentFood to localRecipe");
+                console.log(global.localRecipe);
+            }
         } catch (error) {
-            console.log("No Daily Foods")
-            global.userDailyFoods = null;
+            console.log(error);
         }
     }
 
