@@ -1,6 +1,6 @@
 # EC463_Miniproject
 
-<h3> Members: Ibrahim Chand (U39813006) and Julian Padgett (U########) </h3>
+<h3> Members: Ibrahim Chand (U39813006) and Julian Padgett (U45478831) </h3>
 
 <p>
 The goal of this assignment was to develop a full stack, cross-platform mobile application with a REST API. Our stack consists of React Native and AWS, specifically Amplify, AppSync, DynamoDB, and Cognito.
