@@ -23,11 +23,6 @@ export default function loginScreen({navigation}) {
                     onPress={() => onSignInPress()}>
                     <Text style={styles.buttonTitle}>   Log in with Google   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => onSignOutPress()}>
-                    <Text style={styles.buttonTitle}>   Sign Out   </Text>
-                </TouchableOpacity>
         </View>
     )
 }
