@@ -9,3 +9,5 @@ The goal of this assignment was to develop a full stack, cross-platform mobile a
 <p>
 The app itself is a food-tracking app that features a barcode scanner to scan food items. A FDA API is used to retrieve data based on the items UPC, specifically the caloric content. The user can then specify the number of servings and add the food to their daily food list or to a custom recipe. The user must login before being able to use the app and authentication is done through Gmail. 
 </p>
+
+<p>Note: Application will not work without first installing the AWS Amplify CLI and pulling the Amplify app along with generating the AppSync files and code.</p>
