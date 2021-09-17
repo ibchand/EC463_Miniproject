@@ -36,7 +36,7 @@ function App() {
           </Stack.Screen>
         ) : (
           <>
-            {/* <Stack.Screen name="Login" component={loginScreen} /> */}
+            <Stack.Screen name="Login" component={loginScreen} />
             <Stack.Screen name="Home" component={homeScreen} options={{ headerLeft: null, gestureEnabled: false }} />
 
           </>

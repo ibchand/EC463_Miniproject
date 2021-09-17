@@ -6,9 +6,6 @@ import styles from './styles';
 import { Auth } from "aws-amplify";
 
 export default function loginScreen({navigation}) {
-    // const [email, setEmail] = useState('')
-    // const [password, setPassword] = useState('')
-
     const onSignInPress = () => {
         Auth.federatedSignIn({provider: 'Google'})
         navigation.navigate('Home')
@@ -21,8 +18,6 @@ export default function loginScreen({navigation}) {
 
     return (
         <View style={styles.container}>
-            {/* <KeyboardAwareScrollView */}
-                {/* keyboardShouldPersistTaps="always"> */}
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => onSignInPress()}>
@@ -33,7 +28,6 @@ export default function loginScreen({navigation}) {
                     onPress={() => onSignOutPress()}>
                     <Text style={styles.buttonTitle}>   Sign Out   </Text>
                 </TouchableOpacity>
-            {/* </KeyboardAwareScrollView> */}
         </View>
     )
 }

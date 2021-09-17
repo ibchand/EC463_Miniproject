@@ -7,6 +7,13 @@ export default StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'black'
     },
+    text: {
+        color: 'white',
+        overflow: 'hidden',
+        marginLeft: 30,
+        marginRight: 30,
+        paddingLeft: 16
+    },
     title: {
 
     },

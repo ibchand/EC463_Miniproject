@@ -3,14 +3,12 @@ import { TextInput, StyleSheet, Button, TouchableOpacity, Text, View } from 'rea
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import styles from './styles';
 
-import { Auth, API, graphqlOperation } from "aws-amplify";
+import { Auth } from "aws-amplify";
 
 import { BarCodeScanner } from 'expo-barcode-scanner';
 
 import * as backend_calls from '../../api/backend_calls';
 
-import * as mutations from "../../graphql/mutations";
-import { getFood_table, listFood_tables } from "../../graphql/queries";
 
 global.username = "";
 global.foodname = "";
@@ -22,10 +20,12 @@ global.servings = "";
 global.totalCals = "";
 global.currentFood;
 global.userDailyFoods;
-global.userRecipes;
-global.localRecipe;
+global.userRecipes = [];
+global.localRecipe = [];
 global.listFoodBOOL = false;
 global.listRecipeBOOL = false;
+global.recipeDisplay = "";
+global.foodDisplay = "";
 
 global.userData;
 
@@ -33,11 +33,15 @@ global.userData;
 export default function homeScreen({props, navigation}) {
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
+    const [displayFood, setDisplayFood] = useState(false);
+    const [displayRecipe, setDisplayRecipe] = useState(false);
     const [servings, setServings] = React.useState("Servings");
     const [totalCals, setTotalCals] = React.useState("Calories");
     const [recipeText, onRecipe] = React.useState("Create Recipe");
     const [recipeName, onRecipeName] = React.useState("My Recipe");
     const [username, setUsername] = React.useState("");
+    const [DailyFoodList, onDisplayFood] = React.useState("View Daily Foods");
+    const [RecipeList, onDisplayRecipe] = React.useState("View Recipes");
 
     Auth.currentAuthenticatedUser({
         bypassCache: false
@@ -112,42 +116,46 @@ export default function homeScreen({props, navigation}) {
 
     async function getUserData() {
         try {
+            let isDailyFood = true;
+            let isRecipes = true;
+            global.userData = await backend_calls.getUserData(username);
+
             try {
-                // global.userData = await backend_calls.getUserData(username);
-                global.userData = await backend_calls.getUserData("test_username");
-
-                try {
-                    global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
-                } catch (error) {
-                    console.log("User has no daily foods");
-                    global.userDailyFoods = [];
-                }
-
-                try {
-                    global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
-                } catch (error) {
-                    console.log("User has no recipes");
-                    global.userRecipes = [];
-                } 
-                console.log("Got User Data");
+                global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
             } catch (error) {
+                console.log("User has no daily foods");
+                isDailyFood = false;
+                global.userDailyFoods = [];
+            }
+
+            try {
+                global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
+            } catch (error) {
+                console.log("User has no recipes");
+                isRecipes = false;
+                global.userRecipes = [];
+            }
+            
+            if (!isDailyFood && !isRecipes) {
                 console.log("Failed to pull any user data");
                 global.userDailyFoods = [];
                 global.userRecipes = [];
 
                 // Prep object to store
-                values = {
+                let values = {
                     username: username,
                     daily_foods: JSON.stringify(global.userDailyFoods),
                     recipes: JSON.stringify(global.userRecipes)
                 };
 
                 // Create user data
-                backend_calls.updateUserData(values);
+                backend_calls.createUserData(values);
                 console.log("DAILY: CREATED USER DATA");
 
                 // Pull data
-                getUserData();
+                await getUserData();
+            } else {
+                console.log("Got User Data");
             }
         }
         catch (error) {
@@ -157,22 +165,26 @@ export default function homeScreen({props, navigation}) {
 
     async function addDailyFood() {
         try {
-            // Retreive data from Dynamo Table
-            getUserData();
+            if (global.currentFood != null) {
+                 // Retreive data from Dynamo Table
+                await getUserData();
 
-            // Append new daily foods
-            global.userDailyFoods.push(global.currentFood)
+                // Append new daily foods
+                global.userDailyFoods.push(global.currentFood)
 
-            // Prep object to store
-            values = {
-                username: username,
-                daily_foods: JSON.stringify(global.userDailyFoods),
-                recipes: JSON.stringify(global.userRecipes)
-            };
+                // Prep object to store
+                let values = {
+                    username: username,
+                    daily_foods: JSON.stringify(global.userDailyFoods),
+                    recipes: JSON.stringify(global.userRecipes)
+                };
 
-            // Update user data
-            backend_calls.updateUserData(values);
-            console.log("DAILY: UPDATED USER DATA");
+                // Update user data
+                backend_calls.updateUserData(values);
+                console.log("DAILY: UPDATED USER DATA");
+            } else {
+                console.log("No current food");
+            }
         } catch (error) {
             console.log(error);
         }
@@ -198,14 +210,17 @@ export default function homeScreen({props, navigation}) {
 
             if (!global.recipeBOOL) {
                 // Retreive data from Dynamo Table
-                getUserData();
+                await getUserData();
+
+                // Get Total Calories of current recipe
+                let recipe_cals = await totalCalories(global.localRecipe);
 
                 // Append new recipe
-                global.localRecipe = { recipeName: recipeName, recipe: global.localRecipe };
+                global.localRecipe = { recipeName: recipeName, recipe: global.localRecipe, recipeCals: recipe_cals };
                 global.userRecipes.push(global.localRecipe);
 
                 // Prep object to store
-                values = {
+                let values = {
                     username: username,
                     daily_foods: JSON.stringify(global.userDailyFoods),
                     recipes: JSON.stringify(global.userRecipes)
@@ -214,6 +229,9 @@ export default function homeScreen({props, navigation}) {
                 // Update user data
                 backend_calls.updateUserData(values);
                 console.log("DAILY: UPDATED USER DATA");
+
+                // Reset Local Recipe
+                global.localRecipe = [];
             }
         } catch (error) {
             console.log(error);
@@ -221,37 +239,66 @@ export default function homeScreen({props, navigation}) {
     }
 
     async function listRecipes() {
-        // Retreive data from Dynamo Table
-        getUserData();
+        // Set flag to TRUE
+        setDisplayRecipe(!displayRecipe);
+        !displayRecipe ? onDisplayRecipe("Hide Recipes") : onDisplayRecipe("View Recipes");
 
-        console.log(global.userData);
+        if (!displayRecipe) {
+            // Retreive data from Dynamo Table
+            await getUserData();
 
-
-
-
-        // const userData = await backend_calls.getUserData(username);
-        // try {
-        //     global.userRecipes = [JSON.parse(userData["data"]["getFood_table"]["recipes"])];
-        // } catch (error) {
-        //     console.log("No Recipes")
-        //     global.userRecipes = null;
-        // }
-
-        // for (var i = 0; i < global.userRecipes[0][0].length; i++) {
-        //     if (global.userRecipes[0][0][i] != null) {
-        //         console.log(global.userRecipes[0][0][i]);
-        //     }
-        // }        
+            let output = "";
+            
+            for (var i = 0; i < global.userRecipes.length; i++) {
+                output += "\nRecipe #" + (i+1) + " Name: " + global.userRecipes[i]["recipeName"] + "\n";
+                output += "Total Recipe Calories: " + global.userRecipes[i]["recipeCals"] + "\n"
+                for (var j = 0; j < global.userRecipes[i]["recipe"].length; j++) {
+                    output += "\n";
+                    output += "Food #" + (j+1) + "\n";
+                    output += "Name: " + global.userRecipes[i]["recipe"][j]["Name"] + "\n";
+                    output += "Servings: " +global.userRecipes[i]["recipe"][j]["Servings"] + "\n";
+                    output += "Calories: " + global.userRecipes[i]["recipe"][j]["Calories"] + "\n";
+                    output += "Toital Calories: " + global.userRecipes[i]["recipe"][j]["TotalCals"] + "\n";
+                }
+            } 
+            global.recipeDisplay = output;
+        }     
     }
 
     async function listFoods() {
-        // Retreive data from Dynamo Table
-        getUserData();
+        // Set flag to TRUE
+        setDisplayFood(!displayFood);
+        !displayFood ? onDisplayFood("Hide Daily Foods") : onDisplayFood("View Daily Foods");
 
-        // console.log(global.userData);
-        console.log(global.userDailyFoods);
-        console.log("-----------------")
-        console.log(global.userRecipes);
+        if (displayFood) {
+            // Retreive data from Dynamo Table
+            await getUserData();
+
+            let cal_count = await totalCalories(global.userDailyFoods);
+
+            let output = "";
+            output += "Total Calories: " + cal_count + "\n";
+            for (var i = 0; i < global.userDailyFoods.length; i++) {
+                output += "\n";
+                output += "Food #" + (i+1) + "\n";
+                output += "Name: " + global.userDailyFoods[i]["Name"] + "\n";
+                output += "Servings: " + global.userDailyFoods[i]["Servings"] + "\n";
+                output += "Calories: " + global.userDailyFoods[i]["Calories"] + "\n";
+                output += "Toital Calories: " + global.userDailyFoods[i]["TotalCals"] + "\n";
+            }
+            global.foodDisplay = output;
+        }
+    }
+
+    async function totalCalories(food_list) {
+        // Retreive data from Dynamo Table
+        let cal_count = 0;
+        for (var i = 0; i < food_list.length; i++) {
+            if (food_list[i]["TotalCals"] != null) {
+                cal_count += food_list[i]["TotalCals"];
+            }
+        }
+        return cal_count;
     }
 
 
@@ -270,8 +317,8 @@ export default function homeScreen({props, navigation}) {
                 <View style={{ flex:1 }}>
                     <View style={{ flex:1 }}>
                         {scanned && <TextInput style={styles.input} placeholder="Enter # of Servings" onChangeText={(input)=>calcCals(input)} />}
-                        {scanned && <Text>Total Calories: {totalCals}</Text>}
-                        {scanned && <Text>Total Servings: {servings}</Text>}
+                        {scanned && <Text style={styles.text}>Servings: {servings}</Text>}
+                        {scanned && <Text style={styles.text}>Calories: {totalCals}</Text>}
                     </View>
                     <View style={{ flex:2, background: "#000000" }}>
                         {recipeBOOL && <TextInput style={styles.input} placeholder="Enter Recipe Name" onChangeText={(input)=>onRecipeName(input)} />}
@@ -297,15 +344,17 @@ export default function homeScreen({props, navigation}) {
                         <TouchableOpacity
                             style={styles.button}
                             onPress={() => listRecipes()}>
-                            <Text style={styles.buttonTitle}>View Recipes</Text>
+                            <Text style={styles.buttonTitle}>{RecipeList}</Text>
                         </TouchableOpacity>
+                        {displayRecipe && <Text style={styles.text}>{global.recipeDisplay}</Text>}
                     </View>
                     <View style={{ flex:1, background: "#000000" }}>
                         <TouchableOpacity
                             style={styles.button}
                             onPress={() => listFoods()}>
-                            <Text style={styles.buttonTitle}>View Daily Foods</Text>
+                            <Text style={styles.buttonTitle}>{DailyFoodList}</Text>
                         </TouchableOpacity>
+                        {displayFood && <Text style={styles.text}>{global.foodDisplay}</Text>}
                     </View>
                     <View style={{ flex:1, background: "#000000" }}>
                         <TouchableOpacity
