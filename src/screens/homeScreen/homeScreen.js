@@ -59,11 +59,21 @@ export default function homeScreen({props, navigation}) {
         try {
             setScanned(true);
             // alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+            if (data.substring(0,2) == "00") {
+                data = data.substring(1);
+            }
+
+            if (data.length == 13) {
+                data = data.substring(1);
+            }
+            
             global.upc = data;
 
             url = "https://api.nal.usda.gov/fdc/v1/foods/search?api_key=" + "o6VxgV7qVhQ20G7XXTpYeCmfIm98tjJMwiF2qk9b" + "&query=" + data;
             let response = await fetch(url);
             let responseJSON = await response.json();
+            console.log(url);
+            // console.log(responseJSON);
 
             for (var i = 0; i < responseJSON["foods"].length; i++) {
                 if (responseJSON["foods"][i]["gtinUpc"] == data) {
@@ -243,7 +253,7 @@ export default function homeScreen({props, navigation}) {
         setDisplayRecipe(!displayRecipe);
         !displayRecipe ? onDisplayRecipe("Hide Recipes") : onDisplayRecipe("View Recipes");
 
-        if (!displayRecipe) {
+        if (displayRecipe) {
             // Retreive data from Dynamo Table
             await getUserData();
 

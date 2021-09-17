@@ -7,7 +7,10 @@ export default StyleSheet.create({
         backgroundColor: 'black'
     },
     title: {
-
+        color: 'white',
+        marginTop: '70%',
+        fontSize: 45,
+        fontWeight: 'bold'
     },
     logo: {
         flex: 1,
@@ -34,17 +37,17 @@ export default StyleSheet.create({
         marginTop: 20,
         height: 48,
         borderRadius: 50,
-        alignItems: "center",
+        alignItems: 'center',
         justifyContent: 'center'
     },
     buttonTitle: {
         color: 'white',
-        fontSize: 16,
-        fontWeight: "bold"
+        fontSize: 25,
+        fontWeight: 'bold'
     },
     footerView: {
         flex: 1,
-        alignItems: "center",
+        alignItems: 'center',
         marginTop: 20
     },
     footerText: {
@@ -52,8 +55,8 @@ export default StyleSheet.create({
         color: '#2e2e2d'
     },
     footerLink: {
-        color: "#788eec",
-        fontWeight: "bold",
+        color: '#788eec',
+        fontWeight: 'bold',
         fontSize: 16
     }
 })

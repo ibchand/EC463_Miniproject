@@ -18,6 +18,7 @@ export default function loginScreen({navigation}) {
 
     return (
         <View style={styles.container}>
+            <Text style={styles.title}>Foodie Scanner</Text>
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => onSignInPress()}>
