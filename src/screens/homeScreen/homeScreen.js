@@ -162,8 +162,30 @@ export default function homeScreen({props, navigation}) {
                 backend_calls.createUserData(values);
                 console.log("DAILY: CREATED USER DATA");
 
-                // Pull data
-                await getUserData();
+                // Try to pull data again
+                try {
+                    let isDailyFood = true;
+                    let isRecipes = true;
+                    global.userData = await backend_calls.getUserData(username);
+
+                    try {
+                        global.userDailyFoods = JSON.parse(userData["data"]["getFood_table"]["daily_foods"]);
+                    } catch (error) {
+                        console.log("User has no daily foods");
+                        isDailyFood = false;
+                        global.userDailyFoods = [];
+                    }
+
+                    try {
+                        global.userRecipes = JSON.parse(userData["data"]["getFood_table"]["recipes"]);
+                    } catch (error) {
+                        console.log("User has no recipes");
+                        isRecipes = false;
+                        global.userRecipes = [];
+                    }
+                } catch (error) {
+                    console.log("Failed to pull after creation");
+                }
             } else {
                 console.log("Got User Data");
             }
